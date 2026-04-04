@@ -1,0 +1,3 @@
+day_type,num_days,avg_daily_units,max_daily_units,min_daily_units
+Holiday,143,735080.0,1402305.0,2512.0
+Normal,1541,628484.0,1463084.0,247246.0

@@ -1,0 +1,2 @@
+item_nbr,store_nbr,abc_class,xyz_class,baseline_mae_pct,enhanced_mae_pct,avg_daily_demand,safety_stock,reorder_point,eoq,orders_per_year
+1503844,1,A,Y,19.3,18.1,147.3,229,1260,1639,33

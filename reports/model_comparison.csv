@@ -1,0 +1,3 @@
+model,mae_pct,best_for,why,training_time,interpretability
+LightGBM,18.1,"AZ items — high value, erratic demand","Handles non-linear patterns, promotions, oil price signals",Fast (seconds per item),Medium — feature importance available
+SARIMA,16.4,"AY items — high value, moderate demand","Captures weekly seasonality explicitly, no feature engineering needed",Fast (4s per item),High — statistical confidence intervals
