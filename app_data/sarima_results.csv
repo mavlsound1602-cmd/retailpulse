@@ -1,0 +1,2 @@
+item_nbr,store_nbr,model,abc_xyz,mae,mae_pct,mean_sales,safety_stock,reorder_point,eoq
+1503844,1,SARIMA,AY,24.22,16.4,147.25,229,1260,1639

@@ -3,25 +3,27 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import os
 
 st.set_page_config(page_title='RetailPulse', layout='wide')
 st.title('RetailPulse — Demand Forecasting & Inventory Dashboard')
 st.caption('Supply Chain Analytics | Corporación Favorita Dataset')
 
+DATA = 'app_data'
+
 @st.cache_data
 def load_data():
-    df = pd.read_csv('C:/retailpulse/data/business_outputs.csv')
-    train = pd.read_csv('C:/retailpulse/data/train.csv', parse_dates=['date'],
-                        dtype={'onpromotion':'float32','unit_sales':'float32'}, nrows=500000)
-    oil = pd.read_csv('C:/retailpulse/data/oil.csv', parse_dates=['date'])
-    store_perf = pd.read_csv('C:/retailpulse/reports/store_performance.csv')
-    weekly = pd.read_csv('C:/retailpulse/reports/weekly_seasonality.csv')
-    yoy = pd.read_csv('C:/retailpulse/reports/yoy_growth.csv')
-    oil_sales = pd.read_csv('C:/retailpulse/reports/oil_vs_sales.csv')
-    return df, train, oil, store_perf, weekly, yoy, oil_sales
+    df = pd.read_csv(f'{DATA}/business_outputs.csv')
+    oil = pd.read_csv(f'{DATA}/oil.csv', parse_dates=['date'])
+    store_perf = pd.read_csv(f'{DATA}/store_performance.csv')
+    weekly = pd.read_csv(f'{DATA}/weekly_seasonality.csv')
+    yoy = pd.read_csv(f'{DATA}/yoy_growth.csv')
+    oil_sales = pd.read_csv(f'{DATA}/oil_vs_sales.csv')
+    sarima = pd.read_csv(f'{DATA}/sarima_results.csv')
+    return df, oil, store_perf, weekly, yoy, oil_sales, sarima
 
 with st.spinner('Loading data...'):
-    df, train, oil, store_perf, weekly, yoy, oil_sales = load_data()
+    df, oil, store_perf, weekly, yoy, oil_sales, sarima = load_data()
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(['P&L & Inventory', 'Store Performance', 'Seasonality', 'External Signals', 'Model Comparison'])
 
@@ -91,7 +93,7 @@ with tab3:
         fig5.update_layout(height=300, margin=dict(t=10,b=10), coloraxis_showscale=False)
         st.plotly_chart(fig5, use_container_width=True)
     with col2:
-        st.markdown('##### YoY growth by month (2015 → 2016)')
+        st.markdown('##### YoY growth by month (2015 to 2016)')
         month_names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
         yoy['month_name'] = yoy['month'].apply(lambda x: month_names[x-1])
         fig6 = px.bar(yoy, x='month_name', y='yoy_growth_pct',
@@ -146,6 +148,7 @@ with tab4:
     r2.metric('Reorder Point', f'{reorder_point:.0f} units')
     r3.metric('EOQ', f'{eoq:.0f} units')
     r4.metric('Orders/Year', f'{avg_demand*365/eoq:.0f}')
+
 with tab5:
     st.subheader('Model Comparison — LightGBM vs SARIMA')
     k1,k2,k3 = st.columns(3)
@@ -156,7 +159,6 @@ with tab5:
     col1,col2 = st.columns(2)
     with col1:
         st.markdown('##### MAE% comparison')
-        import plotly.graph_objects as go
         fig_cmp = go.Figure()
         fig_cmp.add_bar(x=['LightGBM','SARIMA'], y=[18.1, 16.4],
                         marker_color=['#378ADD','#1D9E75'],
@@ -180,9 +182,6 @@ with tab5:
         ])
         st.dataframe(routing_df, use_container_width=True, hide_index=True)
     st.divider()
-    st.markdown('##### SARIMA inventory output — item 1503844, store 1')
-    sarima_res = pd.read_csv('C:/retailpulse/reports/sarima_results.csv')
-    st.dataframe(sarima_res, use_container_width=True, hide_index=True)
-    st.divider()
-    st.markdown('##### Key insight')
-    st.info('SARIMA outperforms LightGBM on AY items because weekly seasonality is the dominant signal — no external features needed. LightGBM wins on AZ items where oil prices, promotions, and holidays drive erratic spikes.')
+    st.markdown('##### SARIMA inventory output')
+    st.dataframe(sarima, use_container_width=True, hide_index=True)
+    st.info('SARIMA outperforms LightGBM on AY items because weekly seasonality is the dominant signal. LightGBM wins on AZ items where oil prices, promotions, and holidays drive erratic spikes.')
